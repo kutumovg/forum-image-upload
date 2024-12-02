@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/ui/index.css">
+    <link rel="stylesheet" href="/ui/header.css">
+    <link rel="stylesheet" href="/ui/footer.css">
+    <link rel="icon" type="image/x-icon" href="/ui/images/favicon.png">
+    <title>Forum - Home</title>
+</head>
+<body>
+    <div class="page-container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="container">
+                <h1><a href="/">Book Forum</a></h1>
+                <nav>
+                    {{if .LoggedIn}}
+                        <div class="header-buttons">
+                            <button onclick="window.location.href='/my_posts'">My Posts</button>
+                            <button onclick="window.location.href='/liked_posts'">Liked Posts</button>
+                            <button onclick="window.location.href='/logout'">Logout</button>
+                        </div>
+                    {{else}}
+                        <div class="header-buttons">
+                            <button onclick="window.location.href='/login'">Login</button>
+                            <button onclick="window.location.href='/register'">Register</button>
+                        </div>
+                    {{end}}
+                </nav>
+            </div>
+        </header>
+        
+        <!-- Main Layout -->
+        <div class="main-layout container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                {{if .LoggedIn}}
+                    <p>Hello, {{.Username}}!</p>
+                {{else}}
+                    <p>Hello, Guest!</p>
+                {{end}}
+                <br>
+                <h2>Filter categories</h2>
+                <form method="get" action="/">
+                    <select id="category" name="category" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {{range .Categories}}
+                            <option value="{{.ID}}" {{if eq .ID $.SelectedCategory}}selected{{end}}>{{.Name}}</option>
+                        {{end}}
+                    </select>
+                </form>
+                <br>        
+                {{if .LoggedIn}}
+                    <h2>Create a New Post</h2>
+                    <form method="post" action="/create_post" enctype="multipart/form-data">
+                        <label>Choose categories:</label>
+                        <div>
+                            {{range .Categories}}
+                                <input type="checkbox" name="categories" value="{{.ID}}" id="category_{{.ID}}">
+                                <label for="category_{{.ID}}">{{.Name}}</label><br>
+                            {{end}}
+                        </div>
+                        <textarea id="content" name="content" rows="4" placeholder="What's on your mind?" required></textarea>
+                        <input type="file" name="image" accept="image/jpeg,image/png,image/gif">
+                        <button type="submit">Create Post</button>
+                    </form>
+                {{end}}
+                
+                <!-- {{if .Notification}}
+                <br>
+                    {{if eq .Notification "already_liked"}}
+                        <p style="color: red;">You have already liked this post.</p>
+                    {{else if eq .Notification "already_disliked"}}
+                        <p style="color: red;">You have already disliked this post.</p>
+                    {{end}}
+                {{end}} -->
+            </aside>
+
+            <!-- Main Content -->
+            <main class="content">        
+                <h2>Posts</h2>
+                {{if .Posts}}
+                    {{range .Posts}} 
+                    <div class="post">
+                        {{if .ImagePath}}
+                            <img src="/{{.ImagePath}}" alt="Post Image" class="center">
+                        {{end}}
+                        <p>{{.Content}}</p>
+                        <p>By <strong>{{.Author}}</strong> on {{.CreatedAtFormatted}}</p>
+                        <div class="post-tags">
+                            {{range .Categories}}
+                            <span class="tag">{{.}}</span>
+                            {{end}}
+                        </div>
+                        {{if $.LoggedIn}}
+                        <p>
+                            <form action="/like" method="post" class="like-form">
+                                <input type="hidden" name="post_id" value="{{.ID}}">
+                                <button type="submit" class="like-button">
+                                    <img src="/ui/images/thumbs-up.png" alt="Like">
+                                </button>
+                            </form>  {{.Likes}} 
+                            <form action="/dislike" method="post" class="dislike-form">
+                                <input type="hidden" name="post_id" value="{{.ID}}">
+                                <button type="submit" class="dislike-button">
+                                    <img src="/ui/images/thumbs-down.png" alt="Dislike">
+                                </button>
+                            </form> {{.Dislikes}}
+                        </p>
+                        {{else}}
+                        <p><img src="/ui/images/thumbs-up.png" alt="Like"> {{.Likes}}       <img src="/ui/images/thumbs-down.png" alt="Dislike"> {{.Dislikes}}</p>
+                        {{end}}
+                        <p><a href="/post?id={{.ID}}" class="read-more">View Comments</a></p>
+                    </div>
+                    {{end}} 
+                {{else}}
+                    <p>No posts available.</p>
+                {{end}}
+            </main>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2024 Book Forum</p>
+        </footer>
+    </div>
+</body>
+</html>
